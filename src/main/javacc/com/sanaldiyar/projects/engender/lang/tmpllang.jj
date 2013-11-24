@@ -1,0 +1,139 @@
+options {
+    STATIC = false;
+}
+
+PARSER_BEGIN(TMPLParser)
+
+package com.sanaldiyar.projects.engender.lang;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+
+public class TMPLParser {
+
+    public static Command parse(String data) throws ParseException{
+        TMPLParser parser=new TMPLParser(new StringReader(data));
+        return parser.COMMAND();
+    }
+
+}
+PARSER_END(TMPLParser)
+
+SKIP:
+{
+      " "
+    | "\t"
+    | "\n"
+    | "\r"
+}
+
+TOKEN:
+{
+      <PRINT:      "=" >
+    | <IF:          "if" >
+    | <FOREACH:     "foreach" >
+    | <RPARAN:      "(" >
+    | <LPARAN:      ")" >
+    | <CRPARAN:     "{" >
+    | <CLPARAN:     "}" >
+    | <DOT:         "." >
+    | <EQUALS:      "==">
+    | <NOTEQUALS:   "!=">
+    | <BIG:         ">" >
+    | <LESS:        "<" >
+    | <BIGNEQ:      ">=" >
+    | <LESSNEQ:     "<=" >
+    | <AND:         "and" >
+    | <OR:          "or" >
+    | <NOT:         "!" >
+}
+
+TOKEN: 
+{ 
+      < DIGIT:      (["0"-"9"]) > 
+}
+
+TOKEN: 
+{ 
+      < LETTER:     (["a"-"z","A"-"Z"]) > 
+}
+
+TOKEN: 
+{ 
+      < VARNAME:    <LETTER> (<LETTER>|<DIGIT>|"_")* > 
+}
+
+Command COMMAND():
+{
+    Command command;
+}
+{
+    ( <PRINT> command = PRINTVARIABLECOMMAND() | <IF> command = IFCOMMAND()  )
+    { return command; }
+}
+
+PrintVariableCommand PRINTVARIABLECOMMAND():
+{
+    PrintVariableCommand printVariableCommand=new PrintVariableCommand();
+    Token variablename;
+}
+{
+    "$" variablename = <VARNAME> ( <DOT> <VARNAME>)*
+    { printVariableCommand.setVariableName(variablename.image); return printVariableCommand; }
+}
+
+IfCommand IFCOMMAND():
+{
+    IfCommand ifCommand=new IfCommand();
+    BooleanExpressionCommand booleanExpressionCommand;
+    ArrayList<Command> innerCommands=new ArrayList<Command>();
+    Command innerCommand;
+}
+{
+    <RPARAN> booleanExpressionCommand = BOOLEANEXPRESSIONCOMMAND() <LPARAN> <CRPARAN> (innerCommand = COMMAND() { innerCommands.add(innerCommand); } )* <CLPARAN>
+    { ifCommand.setBooleanExpression(booleanExpressionCommand); ifCommand.setInnerCommands(innerCommands); return ifCommand; }
+}
+
+BooleanExpressionCommand BOOLEANEXPRESSIONCOMMAND():
+{
+    BooleanExpressionCommand booleanExpressionCommand=new BooleanExpressionCommand();
+    BooleanOperation bop;
+    Command left,right;
+}
+{
+    ( left = PRINTVARIABLECOMMAND() | left = CONSTANTCOMMAND() ) bop = COMPARISON() ( right = PRINTVARIABLECOMMAND() | right = CONSTANTCOMMAND() )
+    { booleanExpressionCommand.setLeft(left); booleanExpressionCommand.setBooleanOperation(bop);  booleanExpressionCommand.setRight(right); return booleanExpressionCommand;}
+}
+
+BooleanOperation COMPARISON():
+{
+    BooleanOperation bop;
+}
+{
+     (<EQUALS> { bop=BooleanOperation.EQUALS; }| <NOTEQUALS> { bop=BooleanOperation.NOTEQUALS;}| <BIG> { bop=BooleanOperation.BIG;}| <LESS> { bop=BooleanOperation.LESS;}
+            | <BIGNEQ> { bop=BooleanOperation.BIGNEQ;}| <LESSNEQ>  { bop=BooleanOperation.LESSNEQ;})
+     { return bop; }
+}
+
+ConstantCommand CONSTANTCOMMAND():
+{
+    ConstantCommand constantCommand=new ConstantCommand();
+    Token constant;
+    Token number=null,string=null;
+}
+{
+    ( number = <NUMBER> | string = <STRING> | string = <QUOTED_STRING> )
+    {  if(number!=null) {constantCommand.setNumberValue(Double.parseDouble(number.image)); } constantCommand.setStringValue(string.image); return constantCommand; }
+}
+
+TOKEN: 
+{
+      < STRING:  <LETTER> ( <LETTER> )*  >
+    | < QUOTED_STRING: "\"" (~["\""])+ "\"" >
+}
+
+TOKEN:
+{
+    < NUMBER: <DIGIT> (<DIGIT>)* ( <DOT>  <DIGIT> (<DIGIT>)* )? >
+}
+

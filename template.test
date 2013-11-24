@@ -1,0 +1,6 @@
+bu bir <% =$deneme %> dir.
+<% if("elma"==$deneme) {
+    =$deneme
+} 
+
+%>

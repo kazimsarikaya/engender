@@ -1,12 +1,12 @@
-bu bir <% =$deneme %> dir.
+bu bir <% print $deneme %> dir.
 <% if(("elma"==$deneme)) {
-    ="karnim ac benim yemek versinler bana"
+    print "karnim ac benim yemek versinler bana"
     if((1L==$vars.var1) and ("2"==$vars.var2)){
-        ="uber sey"
+        print "uber sey"
     }
 }
 
 foreach( $item : $items) {
-    =$item =","
+    print $item  print","
 }
 %>

@@ -29,7 +29,7 @@ SKIP:
 
 TOKEN:
 {
-      <PRINT:      "=" >
+      <PRINT:      "print" >
     | <IF:          "if" >
     | <FOREACH:     "foreach" >
     | <LPARAN:      "(" >

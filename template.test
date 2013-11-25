@@ -1,12 +1,14 @@
 bu bir <% print $deneme %> dir.
 <% if(("elma"==$deneme)) {
-    print "karnim ac benim yemek versinler bana"
-    if((1L==$vars.var1) and ("2"==$vars.var2)){
-        print "uber sey"
+    print "karnim ac benim yemek versinler bana\n"
+    if(!(12L==$vars.var1) and ("2"==$vars.var2)){
+        print "uber sey\n"
     }
 }
 
 foreach( $item : $items) {
-    print $item  print","
+    print (~index + 1) print" " print $item  if((~index<(~size-1))) { print"," } print "\n"
 }
+print "\n\tprint\t"
+print 5
 %>

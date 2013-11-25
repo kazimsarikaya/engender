@@ -48,6 +48,12 @@ TOKEN:
     | <NOT:         "!" >
     | <LONG:        "L" >
     | <FDELIM:      ":" >
+    | <VARFLAG:     "$" >
+    | <TEMPVARFLAG: "~"  >
+    | <MINUS:       "-" >
+    | <PLUS:        "+" >
+    | <TIMES:       "*" >
+    | <DIVIDE:      "/" >
 }
 
 TOKEN: 
@@ -81,8 +87,46 @@ Command COMMAND():
     Command command;
 }
 {
-    ( <PRINT> command = PRINTVARIABLECOMMAND() | <PRINT> command = CONSTANTCOMMAND() | <IF> command = IFCOMMAND() | <FOREACH> command = FOREACHCOMMAND() )
+    ( <PRINT> command = EXPRESSIONCOMMAND() | <IF> command = IFCOMMAND() | <FOREACH> command = FOREACHCOMMAND() )
     { return command; }
+}
+
+Command EXPRESSIONCOMMAND():
+{
+    Command command = null;
+}
+{
+    ( command = PRINTVARIABLECOMMAND() | command = CONSTANTCOMMAND() | command = MATHCOMMAND() )
+    { return command; }
+}
+
+MathCommand MATHCOMMAND():
+{
+    MathCommand mathcommand=new MathCommand();
+    Command left,right;
+    MathOp mathop;
+}
+{
+    <LPARAN>  ( left = PRINTVARIABLECOMMAND() | left = NUMBERCOMMAND() )  mathop = MATHOP() ( right = PRINTVARIABLECOMMAND() | right = NUMBERCOMMAND() )  <RPARAN>
+    { mathcommand.setLeft(left); mathcommand.setRight(right); mathcommand.setMathOp(mathop); return mathcommand; }
+}
+
+MathOp MATHOP():
+{
+    MathOp mathop;
+}
+{
+    ( <PLUS> { mathop=MathOp.PLUS; } | <MINUS> { mathop=MathOp.MINUS; } |  <TIMES> { mathop=MathOp.TIMES; } | <DIVIDE> { mathop=MathOp.DIVIDE; } )
+    { return mathop;}
+}
+
+ConstantCommand NUMBERCOMMAND():
+{
+    ConstantCommand numbercommand=new ConstantCommand();
+    Number number;
+}
+{
+    number = NUMBER() { numbercommand.setNumberValue(number); return numbercommand; }
 }
 
 PrintVariableCommand PRINTVARIABLECOMMAND():
@@ -92,7 +136,8 @@ PrintVariableCommand PRINTVARIABLECOMMAND():
     String vid;
 }
 {
-    "$" variablename = <VARNAME> { vid = variablename.image; } ( <DOT> variablename = <VARNAME> { vid += "." +  variablename.image;} )*
+    ( ( <VARFLAG> variablename = <VARNAME> { vid = variablename.image; } ( <DOT> variablename = <VARNAME> { vid += "." +  variablename.image;} )* ) 
+        | ( <TEMPVARFLAG> variablename = <VARNAME> { vid = "---tempvar~" + variablename.image; } ) )
     { printVariableCommand.setVariableName(vid); return printVariableCommand; }
 }
 
@@ -117,7 +162,11 @@ BooleanExpressionCommand BOOLEANEXPRESSIONCOMMAND():
     BooleanExpressionCommand nc=null;
 }
 {
-    <LPARAN> ( left = PRINTVARIABLECOMMAND() | left = CONSTANTCOMMAND() ) bop = COMPARISON() ( right = PRINTVARIABLECOMMAND() | right = CONSTANTCOMMAND() ) <RPARAN>
+    (<NOT> { booleanExpressionCommand.setNot(true); })? 
+         <LPARAN> ( left = EXPRESSIONCOMMAND() ) 
+                    bop = COMPARISON() 
+                  ( right = EXPRESSIONCOMMAND() ) 
+         <RPARAN>
             ( bm = MERGER()  nc=BOOLEANEXPRESSIONCOMMAND() { booleanExpressionCommand.setBooleanMerger(bm); booleanExpressionCommand.setNextCommand(nc); } )?
     { booleanExpressionCommand.setLeft(left); booleanExpressionCommand.setBooleanOperation(bop);  booleanExpressionCommand.setRight(right); return booleanExpressionCommand;}
 }

@@ -58,4 +58,11 @@
 
     <dependencies>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>sanaldiyar-snapshot</id>
+            <name>Sanal Diyar Snapshot</name>
+            <url>http://maven2.sanaldiyar.com/snap-repo/</url>
+        </repository>
+    </distributionManagement>
 </project>

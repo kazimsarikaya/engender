@@ -1,0 +1,33 @@
+Engender is a simple template engine.
+It knows several simple scripts to build a template.
+
+The language of Engender should be inside "<%" and "%>".
+
+Engender supports if and foreach, can print data, and math operations.
+
+Engender is used by the class Engender with method engender. Engender methods
+create a temporary file to produce template output. Each variable for template
+should be map of string keys and object values.
+
+Engender does not support local variable definition.
+
+Examples:
+
+print a variable: <% print $key1.key2 %> 
+here key1 is the first key in map, value of key1 is also a map hence the printed
+value is the value of key2 from the map key1 returns.
+
+if statement: if( (<boolean expr>) ) { <commands> }
+boolean expr is in format: expression op expression
+expression is one of math expr, variable or constant. op is one of == != < > <= >=
+commands are the squence of the language itself. boolean expr can be combined 
+with and or keywords and reversed with ! operator.
+
+math expr is the format variable op number. here op is + - * /
+
+constant can be number, string or quoted string
+
+foreach: foreach( $item : $items ) {  <commands> }
+commands are same as in if statement
+$item is local variable for loop, $items is variable from map (supports print
+variable). foreach has two temporary variable ~index and ~count

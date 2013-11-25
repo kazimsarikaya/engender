@@ -13,10 +13,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,25 +92,6 @@ public class Engender {
             result = parsed.toString();
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("deneme", "elma");
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("var1", 1L);
-            vars.put("var2", "2");
-            data.put("vars", vars);
-            data.put("items", new String[]{"string1","string2","string3"});
-            File engender = engender("template.test", data);
-            List<String> readAllLines = Files.readAllLines(engender.toPath(), Charset.forName("utf-8"));
-            for (String line : readAllLines) {
-                System.out.println(line);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Engender.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
 }

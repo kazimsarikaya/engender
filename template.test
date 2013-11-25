@@ -5,5 +5,10 @@ bu bir <% =$deneme %> dir.
         ="uber sey"
     }
 }
+%>
 
+<%
+foreach( $item : $items) {
+    =$item =","
+}
 %>

@@ -47,6 +47,7 @@ TOKEN:
     | <OR:          "or" >
     | <NOT:         "!" >
     | <LONG:        "L" >
+    | <FDELIM:      ":" >
 }
 
 TOKEN: 
@@ -69,7 +70,7 @@ Command COMMAND():
     Command command;
 }
 {
-    ( <PRINT> command = PRINTVARIABLECOMMAND() | <PRINT> command = CONSTANTCOMMAND() | <IF> command = IFCOMMAND()  )
+    ( <PRINT> command = PRINTVARIABLECOMMAND() | <PRINT> command = CONSTANTCOMMAND() | <IF> command = IFCOMMAND() | <FOREACH> command = FOREACHCOMMAND() )
     { return command; }
 }
 
@@ -160,3 +161,16 @@ Number NUMBER():
      {  if(isdouble){ return Double.parseDouble(data); } else { if(islong) { return Long.parseLong(data);} else { return Integer.parseInt(data); } }  }
 }
 
+ForeachCommand FOREACHCOMMAND():
+{
+    ForeachCommand fcmd=new ForeachCommand();
+    ArrayList<Command> innerCommands=new ArrayList<Command>();
+    Command innerCommand;
+    Token variablename;
+    PrintVariableCommand printVariableCommand;
+}
+{
+    <LPARAN> "$" variablename = <VARNAME> <FDELIM> printVariableCommand = PRINTVARIABLECOMMAND()  <RPARAN> <CLPARAN> (innerCommand = COMMAND() { innerCommands.add(innerCommand); } )* <CRPARAN>
+    { fcmd.setVariableName(variablename.image); fcmd.setPrintVariableCommand(printVariableCommand); 
+            fcmd.setInnerCommands(innerCommands);  return fcmd; }
+}

@@ -82,6 +82,9 @@ public class Engender {
     }
 
     private static String convertToString(Object parsed) {
+        if(parsed==null){
+            return "";
+        }
         String result;
         if (parsed instanceof Iterable) {
             StringBuilder sb = new StringBuilder();
@@ -103,6 +106,7 @@ public class Engender {
             vars.put("var1", 1L);
             vars.put("var2", "2");
             data.put("vars", vars);
+            data.put("items", new String[]{"string1","string2","string3"});
             File engender = engender("template.test", data);
             List<String> readAllLines = Files.readAllLines(engender.toPath(), Charset.forName("utf-8"));
             for (String line : readAllLines) {

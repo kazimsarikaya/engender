@@ -36,13 +36,28 @@ public class ForeachCommand implements Command {
         Object titems = printVariableCommand.applyData(data);
         ArrayList<Object> datas = new ArrayList<>();
         if (titems instanceof Iterable) {
+            int size = 0;
             for (Object item : (Iterable) titems) {
+                size++;
+            }
+            data.put("---tempvar~size", size);
+            int index = 0;
+            for (Object item : (Iterable) titems) {
+                data.put("---tempvar~index", index++);
                 datas.add(applyItemData(item, data));
             }
+            data.remove("---tempvar~index");
+            data.remove("---tempvar~size");
         } else {
+            int size = ((Object[]) titems).length;
+            data.put("---tempvar~size", size);
+            int index = 0;
             for (Object item : (Object[]) titems) {
+                data.put("---tempvar~index", index++);
                 datas.add(applyItemData(item, data));
             }
+            data.remove("---tempvar~index");
+            data.remove("---tempvar~size");
         }
         return datas;
     }

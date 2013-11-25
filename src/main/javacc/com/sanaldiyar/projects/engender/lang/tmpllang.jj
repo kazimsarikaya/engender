@@ -13,7 +13,7 @@ public class TMPLParser {
 
     public static Command parse(String data) throws ParseException{
         TMPLParser parser=new TMPLParser(new StringReader(data));
-        return parser.COMMAND();
+        return parser.COMMANDS();
     }
 
 }
@@ -63,6 +63,17 @@ TOKEN:
 TOKEN: 
 { 
       < VARNAME:    <LETTER> (<LETTER>|<DIGIT>|"_")* > 
+}
+
+CommandList COMMANDS():
+{
+    CommandList cl=new CommandList();
+    ArrayList<Command> commands=new ArrayList<Command>();
+    Command command;
+}
+{
+    ( command = COMMAND() { commands.add(command); } )+
+    { cl.setCommands(commands); return cl; }
 }
 
 Command COMMAND():

@@ -22,6 +22,9 @@ public class ConstantCommand implements Command {
 
     public void setStringValue(String stringValue) {
         this.stringValue = stringValue;
+        this.stringValue = this.stringValue.replace("\\n", "\n");
+        this.stringValue = this.stringValue.replace("\\r", "\r");
+        this.stringValue = this.stringValue.replace("\\t", "\t");
     }
 
     @Override

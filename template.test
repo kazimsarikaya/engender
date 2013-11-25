@@ -1,6 +1,9 @@
 bu bir <% =$deneme %> dir.
-<% if("elma"==$deneme) {
-    =$deneme
-} 
+<% if(("elma"==$deneme)) {
+    ="karnim ac benim yemek versinler bana"
+    if((1L==$vars.var1) and ("2"==$vars.var2)){
+        ="uber sey"
+    }
+}
 
 %>

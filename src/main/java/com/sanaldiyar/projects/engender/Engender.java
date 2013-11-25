@@ -62,7 +62,8 @@ public class Engender {
                         String command = sbcommand.toString().trim();
                         try {
                             Command parse = TMPLParser.parse(command);
-                            String result=parse.applyData(data);
+                            Object parsed = parse.applyData(data);
+                            String result = convertToString(parsed);
                             fos.write(result.getBytes("utf-8"));
                         } catch (ParseException ex) {
                             Logger.getLogger(Engender.class.getName()).log(Level.SEVERE, null, ex);
@@ -80,13 +81,33 @@ public class Engender {
         return tempFile;
     }
 
+    private static String convertToString(Object parsed) {
+        String result;
+        if (parsed instanceof Iterable) {
+            StringBuilder sb = new StringBuilder();
+            for (Object o : (Iterable) parsed) {
+                sb.append(convertToString(o));
+            }
+            result = sb.toString();
+        } else {
+            result = parsed.toString();
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         try {
             Map<String, Object> data = new HashMap<>();
-            data.put("deneme", "ne güzel bir gün");
+            data.put("deneme", "elma");
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("var1", 1L);
+            vars.put("var2", "2");
+            data.put("vars", vars);
             File engender = engender("template.test", data);
             List<String> readAllLines = Files.readAllLines(engender.toPath(), Charset.forName("utf-8"));
-            System.out.println("");
+            for (String line : readAllLines) {
+                System.out.println(line);
+            }
         } catch (IOException ex) {
             Logger.getLogger(Engender.class.getName()).log(Level.SEVERE, null, ex);
         }

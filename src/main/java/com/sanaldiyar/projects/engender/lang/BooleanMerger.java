@@ -5,13 +5,11 @@
  */
 package com.sanaldiyar.projects.engender.lang;
 
-import java.util.Map;
-
 /**
  *
  * @author kazim
  */
-public interface Command {
+public enum BooleanMerger {
 
-    public Object applyData(Map<String, Object> data);
+    AND, OR;
 }

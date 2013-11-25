@@ -32,10 +32,10 @@ TOKEN:
       <PRINT:      "=" >
     | <IF:          "if" >
     | <FOREACH:     "foreach" >
-    | <RPARAN:      "(" >
-    | <LPARAN:      ")" >
-    | <CRPARAN:     "{" >
-    | <CLPARAN:     "}" >
+    | <LPARAN:      "(" >
+    | <RPARAN:      ")" >
+    | <CLPARAN:     "{" >
+    | <CRPARAN:     "}" >
     | <DOT:         "." >
     | <EQUALS:      "==">
     | <NOTEQUALS:   "!=">
@@ -46,6 +46,7 @@ TOKEN:
     | <AND:         "and" >
     | <OR:          "or" >
     | <NOT:         "!" >
+    | <LONG:        "L" >
 }
 
 TOKEN: 
@@ -68,7 +69,7 @@ Command COMMAND():
     Command command;
 }
 {
-    ( <PRINT> command = PRINTVARIABLECOMMAND() | <IF> command = IFCOMMAND()  )
+    ( <PRINT> command = PRINTVARIABLECOMMAND() | <PRINT> command = CONSTANTCOMMAND() | <IF> command = IFCOMMAND()  )
     { return command; }
 }
 
@@ -76,10 +77,11 @@ PrintVariableCommand PRINTVARIABLECOMMAND():
 {
     PrintVariableCommand printVariableCommand=new PrintVariableCommand();
     Token variablename;
+    String vid;
 }
 {
-    "$" variablename = <VARNAME> ( <DOT> <VARNAME>)*
-    { printVariableCommand.setVariableName(variablename.image); return printVariableCommand; }
+    "$" variablename = <VARNAME> { vid = variablename.image; } ( <DOT> variablename = <VARNAME> { vid += "." +  variablename.image;} )*
+    { printVariableCommand.setVariableName(vid); return printVariableCommand; }
 }
 
 IfCommand IFCOMMAND():
@@ -90,7 +92,7 @@ IfCommand IFCOMMAND():
     Command innerCommand;
 }
 {
-    <RPARAN> booleanExpressionCommand = BOOLEANEXPRESSIONCOMMAND() <LPARAN> <CRPARAN> (innerCommand = COMMAND() { innerCommands.add(innerCommand); } )* <CLPARAN>
+    <LPARAN> booleanExpressionCommand = BOOLEANEXPRESSIONCOMMAND() <RPARAN> <CLPARAN> (innerCommand = COMMAND() { innerCommands.add(innerCommand); } )* <CRPARAN>
     { ifCommand.setBooleanExpression(booleanExpressionCommand); ifCommand.setInnerCommands(innerCommands); return ifCommand; }
 }
 
@@ -98,11 +100,22 @@ BooleanExpressionCommand BOOLEANEXPRESSIONCOMMAND():
 {
     BooleanExpressionCommand booleanExpressionCommand=new BooleanExpressionCommand();
     BooleanOperation bop;
+    BooleanMerger bm;
     Command left,right;
+    BooleanExpressionCommand nc=null;
 }
 {
-    ( left = PRINTVARIABLECOMMAND() | left = CONSTANTCOMMAND() ) bop = COMPARISON() ( right = PRINTVARIABLECOMMAND() | right = CONSTANTCOMMAND() )
+    <LPARAN> ( left = PRINTVARIABLECOMMAND() | left = CONSTANTCOMMAND() ) bop = COMPARISON() ( right = PRINTVARIABLECOMMAND() | right = CONSTANTCOMMAND() ) <RPARAN>
+            ( bm = MERGER()  nc=BOOLEANEXPRESSIONCOMMAND() { booleanExpressionCommand.setBooleanMerger(bm); booleanExpressionCommand.setNextCommand(nc); } )?
     { booleanExpressionCommand.setLeft(left); booleanExpressionCommand.setBooleanOperation(bop);  booleanExpressionCommand.setRight(right); return booleanExpressionCommand;}
+}
+
+BooleanMerger MERGER():
+{
+    BooleanMerger bm;
+}
+{
+    ( <AND> {bm=BooleanMerger.AND;} | <OR> {bm=BooleanMerger.OR;} ) { return bm; }
 }
 
 BooleanOperation COMPARISON():
@@ -119,11 +132,13 @@ ConstantCommand CONSTANTCOMMAND():
 {
     ConstantCommand constantCommand=new ConstantCommand();
     Token constant;
-    Token number=null,string=null;
+    Token string=null;
+    Number number;
 }
 {
-    ( number = <NUMBER> | string = <STRING> | string = <QUOTED_STRING> )
-    {  if(number!=null) {constantCommand.setNumberValue(Double.parseDouble(number.image)); } constantCommand.setStringValue(string.image); return constantCommand; }
+    ( number = NUMBER() {constantCommand.setNumberValue(number); } | string = <STRING> {constantCommand.setStringValue(string.image);} | 
+            string = <QUOTED_STRING> { String sv=string.image; sv=sv.substring(1,sv.length()-1); constantCommand.setStringValue(sv); } )
+    { return constantCommand; }
 }
 
 TOKEN: 
@@ -132,8 +147,16 @@ TOKEN:
     | < QUOTED_STRING: "\"" (~["\""])+ "\"" >
 }
 
-TOKEN:
+Number NUMBER():
 {
-    < NUMBER: <DIGIT> (<DIGIT>)* ( <DOT>  <DIGIT> (<DIGIT>)* )? >
+    Token digitToken;
+    String data;
+    boolean isdouble=false;
+    boolean islong=false;
+}
+{
+    digitToken = <DIGIT> { data=digitToken.image; } (<DIGIT> { data+=digitToken.image; } )* ( <LONG> { islong = true; } | 
+                ( <DOT> { data+='.'; isdouble=true; }  <DIGIT> { data+=digitToken.image; } (<DIGIT> { data+=digitToken.image; })* ) )?
+     {  if(isdouble){ return Double.parseDouble(data); } else { if(islong) { return Long.parseLong(data);} else { return Integer.parseInt(data); } }  }
 }
 

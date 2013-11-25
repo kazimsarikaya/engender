@@ -20,18 +20,15 @@ public class PrintVariableCommand implements Command {
     }
 
     @Override
-    public String applyData(Map<String, Object> data) {
+    public Object applyData(Map<String, Object> data) {
         String[] split = variableName.split("\\.");
         Map tmp = data;
         int i = 0;
         while (i < split.length - 1) {
-            if (tmp.containsKey(split[i])) {
-                break;
-            }
             tmp = (Map) tmp.get(split[i]);
             i++;
         }
-        return tmp.get(split[i]).toString();
+        return tmp.get(split[i]);
     }
 
 }

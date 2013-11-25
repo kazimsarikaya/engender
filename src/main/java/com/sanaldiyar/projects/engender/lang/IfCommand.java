@@ -26,8 +26,15 @@ public class IfCommand implements Command {
     }
 
     @Override
-    public String applyData(Map<String, Object> data) {
-        return "";
+    public Object applyData(Map<String, Object> data) {
+        if((Boolean)booleanExpressionCommand.applyData(data)){
+            ArrayList<Object> datas=new ArrayList<>();
+            for(Command cmd : innerCommands){
+                datas.add(cmd.applyData(data));
+            }
+            return (Iterable<Object>)datas;
+        }
+        return null;
     }
 
 }

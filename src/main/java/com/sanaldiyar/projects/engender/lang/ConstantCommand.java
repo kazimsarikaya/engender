@@ -24,17 +24,9 @@ public class ConstantCommand implements Command {
         this.stringValue = stringValue;
     }
 
-    public Number getNumberValue() {
-        return numberValue;
-    }
-
-    public String getStringValue() {
-        return stringValue;
-    }
-
     @Override
-    public String applyData(Map<String, Object> data) {
-        return (String) (stringValue == null ? numberValue : stringValue);
+    public Object applyData(Map<String, Object> data) {
+        return stringValue == null ? numberValue : stringValue;
     }
 
 }

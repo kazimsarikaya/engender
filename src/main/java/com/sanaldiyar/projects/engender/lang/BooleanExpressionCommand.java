@@ -17,6 +17,11 @@ public class BooleanExpressionCommand implements Command {
     private BooleanOperation booleanOperation;
     private BooleanMerger booleanMerger;
     private BooleanExpressionCommand nextCommand;
+    private boolean not = false;
+
+    public void setNot(boolean not) {
+        this.not = not;
+    }
 
     public void setLeft(Command left) {
         this.left = left;
@@ -72,6 +77,9 @@ public class BooleanExpressionCommand implements Command {
                 res |= (Boolean) tmp.applyData(data);
             }
             tmp = tmp.nextCommand;
+        }
+        if (not) {
+            res = !res;
         }
         return Boolean.valueOf(res);
     }
